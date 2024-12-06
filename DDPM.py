@@ -11,7 +11,6 @@ class DenoiseDiffusion():
     """
     Denoise Diffusion
     """
-
     def __init__(self, eps_model: nn.Module, n_steps: int, device: torch.device):
         """
         Params:
@@ -24,9 +23,9 @@ class DenoiseDiffusion():
         self.eps_model = eps_model
         # 人为设置超参数beta，满足beta随着t的增大而增大，同时将beta搬运到训练硬件上
         self.beta = torch.linspace(0.0001, 0.02, n_steps).to(device)
-        # 根据beta计算alpha（参见数学原理篇）
+        # 根据beta计算alpha
         self.alpha = 1. - self.beta
-        # 根据alpha计算alpha_bar（参见数学原理篇）
+        # 根据alpha计算alpha_bar
         self.alpha_bar = torch.cumprod(self.alpha, dim=0)
         # 定义训练总步长
         self.n_steps = n_steps
@@ -123,18 +122,16 @@ class DenoiseDiffusion():
         # 随机抽样t
         t = torch.randint(0, self.n_steps, (batch_size,), device=x0.device, dtype=torch.long)
 
-        # 如果为传入噪声，则从N(0, I)中抽样噪声
+        # 如果未传入噪声，则从N(0, I)中抽样噪声
         if noise is None:
             noise = torch.randn_like(x0)
 
         # 执行Diffusion process，计算xt
         xt = self.q_sample(x0, t, eps=noise)
         # 执行Denoise Process，得到预测的噪声epsilon_theta
+        # print("loss function xt shape = {}, t shape = {}".format(xt.shape, t.shape))
+
         eps_theta = self.eps_model(xt, t)
-
-
-
-
         # 返回真实噪声和预测噪声之间的mse loss
         return F.mse_loss(noise, eps_theta)
 
