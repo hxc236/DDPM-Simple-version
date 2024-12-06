@@ -11,6 +11,7 @@ class DenoiseDiffusion():
     """
     Denoise Diffusion
     """
+
     def __init__(self, eps_model: nn.Module, n_steps: int, device: torch.device):
         """
         Params:
@@ -121,7 +122,6 @@ class DenoiseDiffusion():
         batch_size = x0.shape[0]
         # 随机抽样t
         t = torch.randint(0, self.n_steps, (batch_size,), device=x0.device, dtype=torch.long)
-
         # 如果未传入噪声，则从N(0, I)中抽样噪声
         if noise is None:
             noise = torch.randn_like(x0)
@@ -130,8 +130,8 @@ class DenoiseDiffusion():
         xt = self.q_sample(x0, t, eps=noise)
         # 执行Denoise Process，得到预测的噪声epsilon_theta
         # print("loss function xt shape = {}, t shape = {}".format(xt.shape, t.shape))
-
         eps_theta = self.eps_model(xt, t)
+
         # 返回真实噪声和预测噪声之间的mse loss
         return F.mse_loss(noise, eps_theta)
 

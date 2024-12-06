@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from PIL import Image
 from matplotlib import pyplot as plt
-from numpy.core.fromnumeric import shape
+
 from numpy.distutils.command.config import config
 from torch import nn
 from torch.cuda import device
@@ -138,3 +138,4 @@ def test_one():
 if __name__ == '__main__':
     test()
     # test_one()
+
