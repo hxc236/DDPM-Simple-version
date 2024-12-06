@@ -19,60 +19,60 @@ from tqdm import tqdm
 
 configs = TestConfig()
 
-def test():
-    # 设备
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # 加载  测试集
-    transform = transforms.Compose([
-        transforms.Resize((32, 32)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, ), (0.5, ))
-    ])
-    test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
-    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
-
-    # 加载模型
-    unet = torch.load(configs.save_dir)  # 替换为你的权重文件路径
-    dm = DenoiseDiffusion(unet, n_steps=configs.n_steps, device=device)
-
-    # FID 初始化
-    fid = FrechetInceptionDistance(feature=2048).to(device)
-
-    # 生成图片并保存
-    save_dir = "./output_images/generated_mnist"
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    generated_images = []
-    real_images = []
-    cur = 0
-    for batch in tqdm(test_loader):
-        cur += 1
-        real_imgs, _ = batch
-        real_imgs = real_imgs.to(device)
-        real_images.append(real_imgs)
-
-        # 从噪声生成图片
-        noise = torch.randn(real_imgs.shape, device=device)
-        with torch.no_grad():
-            generated_imgs = dm.sample(noise)  # 调用 DDPM 推理方法生成 x0
-
-        # 直接保存
-        save_image(generated_imgs, os.path.join(save_dir, f"generated_{cur}.png"))
-
-        generated_images.append(generated_imgs)
-
-        # 保存生成图片
-    # save_images(torch.cat(generated_images, dim=0), save_dir)
-
-    # 计算 FID
-    for real, fake in zip(real_images, generated_images):
-        fid.update(real, real=True)
-        fid.update(fake, real=False)
-
-    fid_score = fid.compute()
-    print(f"FID score: {fid_score}")
+# def test():
+#     # 设备
+#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#
+#     # 加载  测试集
+#     transform = transforms.Compose([
+#         transforms.Resize((32, 32)),
+#         transforms.ToTensor(),
+#         transforms.Normalize((0.5, ), (0.5, ))
+#     ])
+#     test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+#     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+#
+#     # 加载模型
+#     unet = torch.load(configs.save_dir)  # 替换为你的权重文件路径
+#     dm = DenoiseDiffusion(unet, n_steps=configs.n_steps, device=device)
+#
+#     # FID 初始化
+#     fid = FrechetInceptionDistance(feature=2048).to(device)
+#
+#     # 生成图片并保存
+#     save_dir = "./output_images/generated_mnist"
+#     if not os.path.exists(save_dir):
+#         os.makedirs(save_dir)
+#
+#     generated_images = []
+#     real_images = []
+#     cur = 0
+#     for batch in tqdm(test_loader):
+#         cur += 1
+#         real_imgs, _ = batch
+#         real_imgs = real_imgs.to(device)
+#         real_images.append(real_imgs)
+#
+#         # 从噪声生成图片
+#         noise = torch.randn(real_imgs.shape, device=device)
+#         with torch.no_grad():
+#             generated_imgs = dm.sample(noise)  # 调用 DDPM 推理方法生成 x0
+#
+#         # 直接保存
+#         save_image(generated_imgs, os.path.join(save_dir, f"generated_{cur}.png"))
+#
+#         generated_images.append(generated_imgs)
+#
+#         # 保存生成图片
+#     # save_images(torch.cat(generated_images, dim=0), save_dir)
+#
+#     # 计算 FID
+#     for real, fake in zip(real_images, generated_images):
+#         fid.update(real, real=True)
+#         fid.update(fake, real=False)
+#
+#     fid_score = fid.compute()
+#     print(f"FID score: {fid_score}")
 
 
 def test_one():
@@ -113,5 +113,5 @@ def test_one():
     show_sample(images_, texts)
 
 if __name__ == '__main__':
-    test()
-    # test_one()
+    # test()
+    test_one()
